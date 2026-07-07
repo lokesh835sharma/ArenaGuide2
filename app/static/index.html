@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StadiumMate — Accessible Stadium Assistant</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">⚽</span>
+      <div>
+        <h1 id="app-title">StadiumMate</h1>
+        <p id="app-tagline" class="tagline">Accessible wayfinding for FIFA World Cup 2026</p>
+      </div>
+    </div>
+
+    <nav class="toolbar" aria-label="Display settings">
+      <label class="field inline" for="language">
+        <span data-i18n="language">Language</span>
+        <select id="language" name="language">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </select>
+      </label>
+      <button type="button" id="contrast-toggle" class="toggle-btn" aria-pressed="false">
+        <span data-i18n="highVisibility">High-visibility / screen-reader mode</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main" class="layout">
+    <section class="card" aria-labelledby="form-heading">
+      <h2 id="form-heading" data-i18n="yourContext">Your context</h2>
+      <form id="assist-form" novalidate>
+        <div class="field">
+          <label for="current_location" data-i18n="whereNow">Where are you now?</label>
+          <select id="current_location" name="current_location" required></select>
+        </div>
+
+        <div class="field">
+          <label for="destination_intent" data-i18n="whereGo">Where do you want to go?</label>
+          <select id="destination_intent" name="destination_intent" required></select>
+        </div>
+
+        <fieldset class="field">
+          <legend data-i18n="accessNeeds">Accessibility needs</legend>
+          <label class="check"><input type="checkbox" name="need" value="wheelchair" />
+            <span data-i18n="needWheelchair">Wheelchair / step-free</span></label>
+          <label class="check"><input type="checkbox" name="need" value="visual" />
+            <span data-i18n="needVisual">Low vision / screen reader</span></label>
+          <label class="check"><input type="checkbox" name="need" value="hearing" />
+            <span data-i18n="needHearing">Deaf / hard of hearing</span></label>
+        </fieldset>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ticket_section" data-i18n="ticketSection">Ticket section (optional)</label>
+            <input type="text" id="ticket_section" name="ticket_section"
+                   maxlength="8" inputmode="text" autocomplete="off" placeholder="e.g. 134" />
+          </div>
+          <div class="field">
+            <label for="minutes_to_kickoff" data-i18n="minutesToKickoff">Minutes to kick-off</label>
+            <input type="number" id="minutes_to_kickoff" name="minutes_to_kickoff"
+                   value="20" min="-120" max="1440" step="1" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="question" data-i18n="question">Ask a question (optional)</label>
+          <textarea id="question" name="question" rows="2" maxlength="280"
+                    placeholder="e.g. Where is the nearest step-free restroom?"></textarea>
+          <p id="question-hint" class="hint" data-i18n="questionHint">
+            Free text is treated as data only and never as instructions.</p>
+        </div>
+
+        <button type="submit" id="submit-btn" class="primary-btn" data-i18n="getHelp">
+          Get help
+        </button>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="answer-heading">
+      <h2 id="answer-heading" data-i18n="assistance">Assistance</h2>
+
+      <!-- Assistant output. aria-live announces updates to screen readers. -->
+      <div id="result" class="result" aria-live="polite" aria-busy="false">
+        <p id="placeholder" class="muted" data-i18n="placeholder">
+          Fill in your context and select “Get help”. Your answer appears here.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p id="stadium-meta" class="muted"></p>
+    <p class="muted">
+      <span data-i18n="grounding">Answers are grounded in verified stadium data —
+        the assistant never invents facilities.</span>
+    </p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
