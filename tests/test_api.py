@@ -100,7 +100,7 @@ def test_stadium_metadata(client):
     assert {"gate_a", "concourse_lower_sw", "seating_upper"}.issubset(zone_ids)
     assert body["languages"] == ["en", "es", "fr"]
     assert "restroom" in body["intents"]
-    assert body["stadium"]["name"] == "MetLife Stadium"
+    assert body["stadium"]["name"] == "MetLife VenueMap"
     # Zone names are localized maps (en/es/fr) for the UI language switcher.
     gate_a = next(z for z in body["zones"] if z["id"] == "gate_a")
     assert set(gate_a["name"]) == {"en", "es", "fr"}

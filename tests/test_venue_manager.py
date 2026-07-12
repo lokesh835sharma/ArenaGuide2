@@ -5,7 +5,7 @@ from src.services.venue_manager import VenueData, load_venue
 
 def test_stadium_fixture_loads_successfully():
     venue: VenueData = load_venue()
-    assert venue.name == "MetLife Stadium"
+    assert venue.name == "MetLife VenueMap"
     assert venue.capacity == 82500
     assert "concourse_lower_sw" in venue.zones
     assert len(venue.facilities) > 0

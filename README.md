@@ -6,7 +6,7 @@ ArenaGuide helps fans navigate a venue, find accessible routes and facilities,
 get real-time crowd guidance, and receive help in their language — with every
 answer **grounded in verified stadium data** so the AI never invents facilities.
 
-Modelled venue: **MetLife Stadium** (FIFA name *New York New Jersey Stadium*),
+Modelled venue: **MetLife VenueMap** (FIFA name *New York New Jersey VenueMap*),
 host of the 2026 Final. Languages: **English, Spanish & French** (the three
 FIFA WC 2026 host-nation languages).
 
@@ -101,7 +101,7 @@ graph TB
         RE["⚙️ Rules Engine<br/>rules_engine.py"]
         PF["🗺️ Pathfinder<br/>pathfinder.py<br/>(Dijkstra / BFS)"]
         CR["👥 Crowd Simulator<br/>crowd.py"]
-        SD["🏟️ Stadium Data<br/>stadium_data.py"]
+        SD["🏟️ VenueMap Data<br/>venue_manager.py"]
     end
 
     subgraph "Phrasing Layer"
@@ -291,7 +291,7 @@ pytest            # runs with coverage (see pytest.ini)
 
 | Test File | What It Covers |
 |-----------|---------------|
-| `test_schemas.py` | Validation: bad language/need/intent/zone, oversized strings, out-of-range numbers, need normalization, question sanitization |
+| `test_api_models.py` | Validation: bad language/need/intent/zone, oversized strings, out-of-range numbers, need normalization, question sanitization |
 | `test_rules_engine.py` | Wheelchair → step-free; visual → landmark; hearing → captioned; urgency; crowd-swap; seat resolution; **merchandise routing**; **time estimation**; **hurry mode advice** (EN/ES/FR) |
 | `test_api.py` | `/health`, `/`, `/api/assist` happy path, short-circuit, French + Spanish localized answers, `422` on malformed input, `/api/stadium` |
 | `test_security.py` | Prompt injection resilience, OfflineModel fallback, rate limiting `429`, sanitization, security headers |
@@ -299,7 +299,7 @@ pytest            # runs with coverage (see pytest.ini)
 | `test_phrasing.py` | EN/ES/FR phrasing with all flags, **offline advice rendering** |
 | `test_crowd.py` | Crowd simulation logic |
 | `test_pathfinder.py` | Step-free pathfinding |
-| `test_stadium_data.py` | Localized name resolution |
+| `test_venue_manager.py` | Localized name resolution |
 | `test_static.py` | Static accessibility markers |
 
 **Lint & types** — both pass clean:
@@ -320,10 +320,10 @@ arenaguide/
 │   ├── config.py            # pydantic-settings (no committed secrets)
 │   ├── logging_conf.py      # privacy-preserving logging
 │   ├── models/
-│   │   └── schemas.py       # Pydantic models, enums, validators
+│   │   └── api_models.py       # Pydantic models, enums, validators
 │   ├── services/
 │   │   ├── rules_engine.py  # rules → EngineOutput (before any LLM)
-│   │   ├── stadium_data.py  # loads JSON fixtures once; graph + lookups
+│   │   ├── venue_manager.py  # loads JSON fixtures once; graph + lookups
 │   │   ├── pathfinder.py    # Dijkstra with step-free constraint
 │   │   ├── crowd.py         # time-based crowd simulation
 │   │   ├── phrasing.py      # EN/ES/FR templated phrasing (lru_cache)
@@ -346,7 +346,7 @@ arenaguide/
 
 ## 8. Assumptions
 
-- Stadium map, facilities, and base crowd levels are **illustrative fixture data**
+- VenueMap map, facilities, and base crowd levels are **illustrative fixture data**
   (`src/data/*.json`), not official MetLife/FIFA data.
 - Crowd levels are **simulated** from `time_to_event`, not a live feed.
 - A **single** stadium is modelled.
