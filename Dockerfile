@@ -1,6 +1,6 @@
 # StadiumMate — container image for Google Cloud Run.
 # Cloud Run injects $PORT (default 8080); uvicorn binds to it on 0.0.0.0.
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -13,10 +13,9 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Application code (includes app/data fixtures and app/static UI).
-COPY app ./app
+COPY src ./src
 
 EXPOSE 8080
 
 # Shell form so ${PORT} is expanded at runtime by Cloud Run.
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
+CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8080}"]

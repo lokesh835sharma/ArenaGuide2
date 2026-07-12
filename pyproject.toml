@@ -2,11 +2,11 @@
 name = "arenaguide"
 version = "1.0.0"
 description = "Multilingual, accessible stadium assistant for FIFA World Cup 2026."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 # pycodestyle, pyflakes, isort, pyupgrade, bugbear, comprehensions, simplify.
@@ -18,7 +18,7 @@ ignore = ["E501"]
 "tests/*" = ["S101"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 ignore_missing_imports = true   # google.generativeai is imported lazily / optionally
 warn_redundant_casts = true
 warn_unused_ignores = true
