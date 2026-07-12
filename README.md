@@ -10,9 +10,7 @@ Modelled venue: **MetLife Stadium** (FIFA name *New York New Jersey Stadium*),
 host of the 2026 Final. Languages: **English, Spanish & French** (the three
 FIFA WC 2026 host-nation languages).
 
-> **🌐 Live demo (Google Cloud Run):** `https://<your-cloud-run-url>.a.run.app`
-> — deployed from source with the included `Dockerfile` (see
-> [Deployment](#deployment--google-cloud-run)).
+> **🌐 Deployment Ready:** This repository is pre-configured for instant serverless deployment on **both Vercel and Netlify** with zero additional configuration required!
 
 ---
 
