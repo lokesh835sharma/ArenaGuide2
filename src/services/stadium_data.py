@@ -6,7 +6,6 @@ exposing a small, well-typed API over an in-memory graph.
 """
 
 from __future__ import annotations
-from typing import Optional, List, Dict
 
 import json
 from dataclasses import dataclass, field
@@ -18,12 +17,12 @@ _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
 #: Localized text is stored as a mapping of language code -> string.
-I18n = Dict[str, str]
+I18n = dict[str, str]
 
 _DEFAULT_LANG = "en"
 
 
-def localized(mapping: Optional[I18n], language: str) -> Optional[str]:
+def localized(mapping: I18n | None, language: str) -> str | None:
     """Resolve a localized string, falling back to English then any available value."""
     if not mapping:
         return None
@@ -62,7 +61,7 @@ class Facility:
     type: str
     zone: str
     accessible: bool
-    landmarks: Optional[I18n] = None
+    landmarks: I18n | None = None
 
 
 @dataclass
@@ -73,11 +72,11 @@ class VenueData:
     fifa_name: str
     city: str
     capacity: int
-    zones: Dict[str, Zone]
-    adjacency: Dict[str, List[Edge]]
-    facilities: List[Facility]
-    crowd_base: Dict[str, str]
-    crowd_sim: Dict[str, Any] = field(default_factory=dict)
+    zones: dict[str, Zone]
+    adjacency: dict[str, list[Edge]]
+    facilities: list[Facility]
+    crowd_base: dict[str, str]
+    crowd_sim: dict[str, Any] = field(default_factory=dict)
 
     # --- Zone helpers -----------------------------------------------------
     def zone_ids(self) -> frozenset[str]:
@@ -92,13 +91,13 @@ class VenueData:
         zone = self.zones.get(zone_id)
         return zone.type if zone else ""
 
-    def neighbors(self, zone_id: str) -> List[Edge]:
+    def neighbors(self, zone_id: str) -> list[Edge]:
         return self.adjacency.get(zone_id, [])
 
     # --- Facility helpers -------------------------------------------------
     def facilities_of_types(
         self, types: set[str], *, accessible_only: bool = False
-    ) -> List[Facility]:
+    ) -> list[Facility]:
         """Return facilities whose type is in ``types`` (optionally accessible-only)."""
         return [
             f
@@ -128,7 +127,7 @@ def _build_venue() -> VenueData:
     }
 
     # Build an undirected adjacency list from the edge list.
-    adjacency: Dict[str, List[Edge]] = {zid: [] for zid in zones}
+    adjacency: dict[str, list[Edge]] = {zid: [] for zid in zones}
     for e in stadium_raw["edges"]:
         src, dst = e["from"], e["to"]
         adjacency[src].append(

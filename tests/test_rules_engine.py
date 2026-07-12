@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.models.schemas import AssistanceMode, DensityLevel, NavigationGoal, FanRequest
+from src.models.schemas import AssistanceMode, FanRequest
 from src.services.rules_engine import PathUnavailable, resolve_navigation
 
 

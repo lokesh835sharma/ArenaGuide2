@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import pytest
-
 from src.services.phrasing import (
     ResponseContext,
-    quieter_option_hint,
     compose_reply,
     direction_text,
+    quieter_option_hint,
     time_alert,
 )
 

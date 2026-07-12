@@ -8,7 +8,6 @@ Endpoints:
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from pathlib import Path
 
@@ -20,12 +19,12 @@ from fastapi.staticfiles import StaticFiles
 from src.config import AppConfig, load_config
 from src.logging_conf import create_logger
 from src.models.schemas import (
-    MobilityRequirement,
+    FanRequest,
     GuidanceResponse,
+    Locale,
+    MobilityRequirement,
     NavigationGoal,
     StatusResponse,
-    Locale,
-    FanRequest,
 )
 from src.services.ai_client import initialize_model
 from src.services.rules_engine import PathUnavailable, process_request
@@ -91,7 +90,7 @@ def _rate_limit_dependency(request: Request) -> None:
         )
 
 
-def create_app(config: Optional[AppConfig] = None) -> FastAPI:
+def create_app(config: AppConfig | None = None) -> FastAPI:
     """Application factory. Accepts an explicit ``config`` (used by tests)."""
     config = config or load_config()
 

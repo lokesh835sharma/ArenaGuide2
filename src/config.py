@@ -7,7 +7,6 @@ back to the offline :class:`~src.services.ai_client.OfflineModel`.
 """
 
 from __future__ import annotations
-from typing import Optional, List
 
 from functools import lru_cache
 
@@ -32,12 +31,12 @@ class AppConfig(BaseSettings):
     app_name: str = "ArenaGuide"
 
     # --- Gemini (optional; absence triggers the OfflineModel fallback) ---
-    gemini_api_key: Optional[str] = Field(default=None, description="Google Gemini API key.")
+    gemini_api_key: str | None = Field(default=None, description="Google Gemini API key.")
     gemini_model: str = Field(default="gemini-1.5-flash")
     gemini_max_output_tokens: int = Field(default=256, ge=16, le=2048)
 
     # --- HTTP security ---
-    allowed_origins: List[str] = Field(
+    allowed_origins: list[str] = Field(
         default=["http://localhost:8000", "http://127.0.0.1:8000"],
         description="Explicit CORS allow-list. Same-origin localhost by default.",
     )

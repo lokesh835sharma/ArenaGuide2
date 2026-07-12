@@ -5,7 +5,6 @@ the behaviour is fully testable offline.
 """
 
 from __future__ import annotations
-from typing import Dict, Tuple
 
 import re
 import threading
@@ -44,7 +43,7 @@ class RequestThrottle:
         self._capacity = float(capacity)
         self._refill = float(refill_per_sec)
         self._max_entries = max_entries
-        self._buckets: Dict[str, Tuple[float, float]] = {}
+        self._buckets: dict[str, tuple[float, float]] = {}
         self._lock = threading.Lock()
 
     def _evict_idle(self) -> None:
@@ -60,7 +59,7 @@ class RequestThrottle:
         for key in sorted(self._buckets, key=lambda k: self._buckets[k][1])[:overflow]:
             del self._buckets[key]
 
-    def check(self, key: str) -> Tuple[bool, float]:
+    def check(self, key: str) -> tuple[bool, float]:
         """Attempt to consume a token for ``key``.
 
         Returns ``(allowed, retry_after_seconds)``. ``retry_after_seconds`` is 0

@@ -7,7 +7,6 @@ straightforward to unit-test.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from src.services.stadium_data import VenueData
 
@@ -19,7 +18,7 @@ def _clamp(index: int) -> str:
     return _LEVELS[max(0, min(len(_LEVELS) - 1, index))]
 
 
-def compute_density(venue: VenueData, zone_id: str, time_to_event: Optional[int]) -> str:
+def compute_density(venue: VenueData, zone_id: str, time_to_event: int | None) -> str:
     """Return the simulated density level (``low`` / ``medium`` / ``high``) for a zone.
 
     Rules (only applied to surge zone types, e.g. gates & concourses):

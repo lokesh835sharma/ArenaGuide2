@@ -6,7 +6,6 @@ rejected, and the free-text ``question`` is sanitized on the way in.
 """
 
 from __future__ import annotations
-from typing import Optional, List
 
 from enum import StrEnum
 
@@ -68,14 +67,14 @@ class FanRequest(BaseModel):
     language: Locale = Locale.en
     current_location: str = Field(..., min_length=1, max_length=40)
     destination_intent: NavigationGoal
-    accessibility_needs: List[MobilityRequirement] = Field(
+    accessibility_needs: list[MobilityRequirement] = Field(
         default_factory=lambda: [MobilityRequirement.none]
     )
-    ticket_section: Optional[str] = Field(
+    ticket_section: str | None = Field(
         default=None, max_length=8, pattern=r"^[A-Za-z0-9\- ]{1,8}$"
     )
     time_to_event: int = Field(..., ge=-120, le=1440)
-    question: Optional[str] = Field(default=None, max_length=280)
+    question: str | None = Field(default=None, max_length=280)
 
     @field_validator("current_location")
     @classmethod
@@ -89,7 +88,7 @@ class FanRequest(BaseModel):
 
     @field_validator("accessibility_needs")
     @classmethod
-    def _normalize_needs(cls, needs: List[MobilityRequirement]) -> List[MobilityRequirement]:
+    def _normalize_needs(cls, needs: list[MobilityRequirement]) -> list[MobilityRequirement]:
         unique = set(needs)
         # "none" is meaningless alongside a real requirement; drop it.
         if MobilityRequirement.none in unique and len(unique) > 1:
@@ -100,7 +99,7 @@ class FanRequest(BaseModel):
 
     @field_validator("question")
     @classmethod
-    def _sanitize_question(cls, value: Optional[str]) -> Optional[str]:
+    def _sanitize_question(cls, value: str | None) -> str | None:
         if value is None:
             return None
         from src.services.security import clean_user_input
@@ -118,7 +117,7 @@ class DirectionStep(BaseModel):
     means: str
     step_free: bool
     distance: int
-    landmark: Optional[str] = None
+    landmark: str | None = None
     instruction: str
 
 
@@ -130,39 +129,39 @@ class VenuePoint(BaseModel):
     type: str
     zone: str
     accessible: bool
-    landmark: Optional[str] = None
+    landmark: str | None = None
 
 
 class NavigationResult(BaseModel):
     """Internal, deterministic result of the navigation engine (pre-phrasing)."""
 
     facility: VenuePoint
-    route_steps: List[DirectionStep]
+    route_steps: list[DirectionStep]
     crowd_level: DensityLevel
     language: Locale
     accessibility_mode: AssistanceMode
     landmark_based: bool = False
     hurry: bool = False
-    alternatives_note: Optional[str] = None
-    urgency: Optional[str] = None
-    estimated_time_minutes: Optional[int] = None
-    offline_advice: Optional[str] = None
+    alternatives_note: str | None = None
+    urgency: str | None = None
+    estimated_time_minutes: int | None = None
+    offline_advice: str | None = None
 
 
 class GuidanceResponse(BaseModel):
     """Response body of ``POST /api/assist``."""
 
     answer: str
-    route_steps: List[DirectionStep]
+    route_steps: list[DirectionStep]
     facility: VenuePoint
     crowd_level: DensityLevel
     language: Locale
     accessibility_mode: AssistanceMode
-    alternatives_note: Optional[str] = None
-    urgency: Optional[str] = None
+    alternatives_note: str | None = None
+    urgency: str | None = None
     used_llm: bool
-    estimated_time_minutes: Optional[int] = None
-    offline_advice: Optional[str] = None
+    estimated_time_minutes: int | None = None
+    offline_advice: str | None = None
 
 
 class StatusResponse(BaseModel):

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from src.services.stadium_data import VenueData, load_venue
 
 
