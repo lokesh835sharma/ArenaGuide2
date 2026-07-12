@@ -8,6 +8,7 @@ on the free-text ``question``, prompt injection cannot change routing or facts.
 """
 
 from __future__ import annotations
+from typing import Optional, List, Dict, Tuple
 
 from src.models.schemas import (
     AssistanceMode,
@@ -29,7 +30,7 @@ from src.services.phrasing import ResponseContext
 from src.services.stadium_data import Edge, Facility, VenueData, localized
 
 # Which facility types satisfy each navigation goal.
-_GOAL_FACILITY_MAP: dict[NavigationGoal, set[str]] = {
+_GOAL_FACILITY_MAP: Dict[NavigationGoal, set[str]] = {
     NavigationGoal.restroom: {"restroom", "accessible_restroom"},
     NavigationGoal.first_aid: {"first_aid"},
     NavigationGoal.concession: {"concession"},
@@ -86,9 +87,9 @@ def _locate_assigned_seat(req: FanRequest, venue: VenueData) -> Facility:
 
 def _reachable_facilities(
     req: FanRequest, venue: VenueData, types: set[str], *, accessible_only: bool, step_free: bool
-) -> list[tuple[Facility, list[Edge], int]]:
+) -> List[Tuple[Facility, List[Edge], int]]:
     """Return (facility, path, distance) for every reachable candidate facility."""
-    results: list[tuple[Facility, list[Edge], int]] = []
+    results: List[Tuple[Facility, List[Edge], int]] = []
     for facility in venue.facilities_of_types(types, accessible_only=accessible_only):
         path = calculate_route(venue, req.current_location, facility.zone, step_free_only=step_free)
         if path is None:
@@ -100,10 +101,10 @@ def _reachable_facilities(
 
 
 def _compile_directions(
-    venue: VenueData, start: str, path: list[Edge], facility: Facility, language: str
-) -> list[DirectionStep]:
+    venue: VenueData, start: str, path: List[Edge], facility: Facility, language: str
+) -> List[DirectionStep]:
     """Turn a path of edges into localized, accessibility-aware direction steps."""
-    steps: list[DirectionStep] = []
+    steps: List[DirectionStep] = []
     facility_name = localized(facility.names, language) or facility.id
     node = start
     for i, edge in enumerate(path):
@@ -156,7 +157,7 @@ def resolve_navigation(req: FanRequest, venue: VenueData) -> NavigationResult:
         path = calculate_route(venue, req.current_location, facility.zone, step_free_only=step_free)
         if path is None:
             raise PathUnavailable("no accessible route to seat")
-        swap_note: str | None = None
+        swap_note: Optional[str] = None
     else:
         types = _GOAL_FACILITY_MAP[req.destination_intent]
         candidates = _reachable_facilities(
@@ -220,9 +221,9 @@ def _crowd_aware_reroute(
     req: FanRequest,
     venue: VenueData,
     facility: Facility,
-    path: list[Edge],
-    candidates: list[tuple[Facility, list[Edge], int]],
-) -> tuple[Facility, list[Edge], str | None]:
+    path: List[Edge],
+    candidates: List[Tuple[Facility, List[Edge], int]],
+) -> Tuple[Facility, List[Edge], Optional[str]]:
     """If the nearest facility is crowded, swap to the quietest nearby alternative."""
     if req.destination_intent not in _SWAP_ELIGIBLE:
         return facility, path, None
@@ -231,7 +232,7 @@ def _crowd_aware_reroute(
     if primary_density != DensityLevel.high:
         return facility, path, None
 
-    alternatives: list[tuple[int, int, str, Facility, list[Edge]]] = []
+    alternatives: List[Tuple[int, int, str, Facility, List[Edge]]] = []
     for cand, cand_path, cand_dist in candidates:
         if cand.id == facility.id:
             continue

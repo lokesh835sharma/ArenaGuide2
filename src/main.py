@@ -8,6 +8,7 @@ Endpoints:
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from pathlib import Path
 
@@ -90,7 +91,7 @@ def _rate_limit_dependency(request: Request) -> None:
         )
 
 
-def create_app(config: AppConfig | None = None) -> FastAPI:
+def create_app(config: Optional[AppConfig] = None) -> FastAPI:
     """Application factory. Accepts an explicit ``config`` (used by tests)."""
     config = config or load_config()
 

@@ -7,6 +7,7 @@ the default ones.
 """
 
 from __future__ import annotations
+from typing import Optional, List, Dict, Tuple
 
 import heapq
 
@@ -15,7 +16,7 @@ from src.services.stadium_data import Edge, VenueData
 
 def calculate_route(
     venue: VenueData, start: str, goal: str, *, step_free_only: bool = False
-) -> list[Edge] | None:
+) -> Optional[List[Edge]]:
     """Return the list of edges from ``start`` to ``goal``.
 
     Returns an empty list when ``start == goal``, and ``None`` when no route
@@ -27,9 +28,9 @@ def calculate_route(
         return None
 
     # Priority queue of (cumulative_distance, zone_id).
-    frontier: list[tuple[int, str]] = [(0, start)]
-    best_cost: dict[str, int] = {start: 0}
-    came_from: dict[str, tuple[str, Edge]] = {}
+    frontier: List[Tuple[int, str]] = [(0, start)]
+    best_cost: Dict[str, int] = {start: 0}
+    came_from: Dict[str, Tuple[str, Edge]] = {}
 
     while frontier:
         cost, node = heapq.heappop(frontier)
@@ -49,9 +50,9 @@ def calculate_route(
     return None
 
 
-def _reconstruct(came_from: dict[str, tuple[str, Edge]], goal: str) -> list[Edge]:
+def _reconstruct(came_from: Dict[str, Tuple[str, Edge]], goal: str) -> List[Edge]:
     """Walk the predecessor map back to the start and return edges in order."""
-    path: list[Edge] = []
+    path: List[Edge] = []
     node = goal
     while node in came_from:
         prev, edge = came_from[node]
@@ -61,6 +62,6 @@ def _reconstruct(came_from: dict[str, tuple[str, Edge]], goal: str) -> list[Edge
     return path
 
 
-def route_distance(path: list[Edge]) -> int:
+def route_distance(path: List[Edge]) -> int:
     """Total distance of a path (0 for an empty path)."""
     return sum(edge.distance for edge in path)

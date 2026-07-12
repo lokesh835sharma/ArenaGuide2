@@ -14,6 +14,7 @@ facts; it never introduces new ones.
 """
 
 from __future__ import annotations
+from typing import Optional, Dict
 
 from dataclasses import dataclass
 from functools import lru_cache
@@ -21,7 +22,7 @@ from functools import lru_cache
 _DEFAULT_LANG = "en"
 
 # Movement verb per travel means (imperative, lower-cased; capitalized on use).
-_MEANS: dict[str, dict[str, str]] = {
+_MEANS: Dict[str, Dict[str, str]] = {
     "en": {"walk": "walk", "ramp": "take the ramp", "elevator": "take the elevator",
            "stairs": "take the stairs"},
     "es": {"walk": "camine", "ramp": "tome la rampa", "elevator": "tome el ascensor",
@@ -30,13 +31,13 @@ _MEANS: dict[str, dict[str, str]] = {
            "stairs": "prenez les escaliers"},
 }
 
-_CROWD_WORD: dict[str, dict[str, str]] = {
+_CROWD_WORD: Dict[str, Dict[str, str]] = {
     "en": {"low": "low", "medium": "moderate", "high": "high"},
     "es": {"low": "baja", "medium": "moderada", "high": "alta"},
     "fr": {"low": "faible", "medium": "modérée", "high": "élevée"},
 }
 
-_TYPE_LABEL: dict[str, dict[str, str]] = {
+_TYPE_LABEL: Dict[str, Dict[str, str]] = {
     "en": {"restroom": "restroom", "accessible_restroom": "accessible restroom",
            "first_aid": "first aid station", "concession": "concession",
            "guest_services": "guest services desk", "water": "water refill point",
@@ -55,26 +56,26 @@ _TYPE_LABEL: dict[str, dict[str, str]] = {
 }
 
 # Route-step templates: {verb} {to} {name} {lm} are filled in.
-_STEP: dict[str, dict[str, str]] = {
+_STEP: Dict[str, Dict[str, str]] = {
     "en": {"final": "{verb} to {to}, where you'll find {name}{lm}.", "mid": "{verb} to {to}."},
     "es": {"final": "{verb} hasta {to}, donde encontrará {name}{lm}.", "mid": "{verb} hasta {to}."},
     "fr": {"final": "{verb} jusqu'à {to}, où se trouve {name}{lm}.", "mid": "{verb} jusqu'à {to}."},
 }
 
-_ALT_NOTE: dict[str, str] = {
+_ALT_NOTE: Dict[str, str] = {
     "en": "A closer {label} was crowded, so a quieter one is suggested.",
     "es": "Un {label} más cercano estaba muy concurrido; se sugiere una opción más tranquila.",
     "fr": "Un(e) {label} plus proche était bondé(e) : une option plus calme est proposée.",
 }
 
-_URGENCY: dict[str, str] = {
+_URGENCY: Dict[str, str] = {
     "en": "Kickoff in under 15 minutes — please hurry.",
     "es": "El partido comienza en menos de 15 minutos: dese prisa.",
     "fr": "Coup d'envoi dans moins de 15 minutes — dépêchez-vous.",
 }
 
 # Sentence fragments composed into the full answer paragraph.
-_ANSWER: dict[str, dict[str, str]] = {
+_ANSWER: Dict[str, Dict[str, str]] = {
     "en": {
         "dest": "Your destination is {name}{lm}.",
         "here": "You're already at this location.",
@@ -122,7 +123,7 @@ def facility_label(facility_type: str, language: str) -> str:
 def direction_text(
     means: str,
     to_name: str,
-    landmark: str | None,
+    landmark: Optional[str],
     *,
     is_final: bool,
     facility_name: str,
@@ -154,16 +155,16 @@ class ResponseContext:
     language: str
     facility_name: str
     facility_type: str
-    facility_landmark: str | None
+    facility_landmark: Optional[str]
     crowd_level: str
     accessibility_mode: str
     landmark_based: bool
     hurry: bool
-    alternative_type: str | None
+    alternative_type: Optional[str]
     total_distance: int
     step_count: int
-    estimated_time_minutes: int | None
-    offline_advice: str | None
+    estimated_time_minutes: Optional[int]
+    offline_advice: Optional[str]
 
 
 @lru_cache(maxsize=256)
