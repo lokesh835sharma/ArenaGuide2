@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 
 from src.config import AppConfig, load_config
 from src.logging_conf import create_logger
-from src.models.schemas import (
+from src.models.api_models import (
     FanRequest,
     GuidanceResponse,
     Locale,
@@ -29,7 +29,7 @@ from src.models.schemas import (
 from src.services.ai_client import initialize_model
 from src.services.rules_engine import PathUnavailable, process_request
 from src.services.security import RequestThrottle
-from src.services.stadium_data import VenueData, load_venue
+from src.services.venue_manager import VenueData, load_venue
 
 logger = create_logger("arenaguide")
 

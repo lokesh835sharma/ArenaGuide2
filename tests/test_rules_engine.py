@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from src.models.schemas import AssistanceMode, FanRequest
+from src.models.api_models import AssistanceMode, FanRequest
 from src.services.rules_engine import PathUnavailable, resolve_navigation
 
 
 @pytest.fixture
 def _venue():
-    from src.services.stadium_data import load_venue
+    from src.services.venue_manager import load_venue
 
     return load_venue()
 

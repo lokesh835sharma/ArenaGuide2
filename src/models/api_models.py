@@ -80,7 +80,7 @@ class FanRequest(BaseModel):
     @classmethod
     def _zone_must_exist(cls, value: str) -> str:
         # Imported lazily to avoid a circular import at module load time.
-        from src.services.stadium_data import load_venue
+        from src.services.venue_manager import load_venue
 
         if value not in load_venue().zone_ids():
             raise ValueError(f"unknown zone id: {value!r}")

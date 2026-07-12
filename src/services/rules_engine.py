@@ -9,7 +9,7 @@ on the free-text ``question``, prompt injection cannot change routing or facts.
 
 from __future__ import annotations
 
-from src.models.schemas import (
+from src.models.api_models import (
     AssistanceMode,
     DensityLevel,
     DirectionStep,
@@ -26,7 +26,7 @@ from src.services.ai_client import LanguageModel
 from src.services.crowd import compute_density
 from src.services.pathfinder import calculate_route, route_distance
 from src.services.phrasing import ResponseContext
-from src.services.stadium_data import Edge, Facility, VenueData, localized
+from src.services.venue_manager import Edge, Facility, VenueData, localized
 
 # Which facility types satisfy each navigation goal.
 _GOAL_FACILITY_MAP: dict[NavigationGoal, set[str]] = {

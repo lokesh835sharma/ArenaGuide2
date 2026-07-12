@@ -7,7 +7,7 @@ from src.services.crowd import compute_density
 
 @pytest.fixture
 def _venue():
-    from src.services.stadium_data import load_venue
+    from src.services.venue_manager import load_venue
 
     return load_venue()
 

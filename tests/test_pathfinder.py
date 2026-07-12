@@ -7,7 +7,7 @@ from src.services.pathfinder import calculate_route, route_distance
 
 @pytest.fixture
 def _venue():
-    from src.services.stadium_data import load_venue
+    from src.services.venue_manager import load_venue
 
     return load_venue()
 

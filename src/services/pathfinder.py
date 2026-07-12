@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import heapq
 
-from src.services.stadium_data import Edge, VenueData
+from src.services.venue_manager import Edge, VenueData
 
 
 def calculate_route(

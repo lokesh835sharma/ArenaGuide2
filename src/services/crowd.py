@@ -8,7 +8,7 @@ straightforward to unit-test.
 
 from __future__ import annotations
 
-from src.services.stadium_data import VenueData
+from src.services.venue_manager import VenueData
 
 _LEVELS = ("low", "medium", "high")
 _LEVEL_INDEX = {level: i for i, level in enumerate(_LEVELS)}

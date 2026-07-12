@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from src.models.schemas import FanRequest, Locale, MobilityRequirement
+from src.models.api_models import FanRequest, Locale, MobilityRequirement
 
 
 def _ctx(**overrides) -> dict:
