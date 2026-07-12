@@ -161,8 +161,11 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
     async def index() -> FileResponse:
         return FileResponse(_STATIC_DIR / "index.html")
 
-    # Serve CSS/JS. (index.html is served explicitly at "/".
-    app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+    # Serve CSS/JS. (index.html is served explicitly at "/").
+    # On Vercel, static files might not be bundled directly into the function if misconfigured,
+    # so we only mount the directory if it exists to prevent startup crashes.
+    if _STATIC_DIR.exists():
+        app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
     return app
 
