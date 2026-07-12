@@ -61,6 +61,10 @@
       "name": { "en": "Sensory Room", "es": "Sala sensorial", "fr": "Salle sensorielle" },
       "landmark": { "en": "the quiet Sensory Room behind Section 130 (North-West)", "es": "la sala sensorial tranquila detrás de la Sección 130 (noroeste)", "fr": "la salle sensorielle calme derrière la Section 130 (nord-ouest)" } },
 
+    { "id": "merchandise_se", "type": "merchandise", "zone": "concourse_lower_se", "accessible": true,
+      "name": { "en": "Team Store", "es": "Tienda del equipo", "fr": "Boutique de l'équipe" },
+      "landmark": { "en": "the main merchandise store (South-East)", "es": "la tienda principal de mercancía (sureste)", "fr": "la boutique principale (sud-est)" } },
+
     { "id": "water_sw", "type": "water", "zone": "concourse_lower_sw", "accessible": true,
       "name": { "en": "South-West Water Refill", "es": "Fuente de agua suroeste", "fr": "Fontaine à eau sud-ouest" },
       "landmark": { "en": "the South-West refill fountains", "es": "las fuentes de recarga suroeste", "fr": "les fontaines de recharge sud-ouest" } },

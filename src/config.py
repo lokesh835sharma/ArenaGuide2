@@ -3,7 +3,7 @@
 Settings are loaded from environment variables (and an optional ``.env`` file)
 via ``pydantic-settings``. Secrets are **never** hard-coded here — the Gemini API
 key is read from the environment and may be absent, in which case the app falls
-back to the offline :class:`~app.services.llm.MockLLM`.
+back to the offline :class:`~src.services.ai_client.OfflineModel`.
 """
 
 from __future__ import annotations
@@ -14,8 +14,8 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
-    """Typed, validated application settings.
+class AppConfig(BaseSettings):
+    """Typed, validated application configuration.
 
     Every field can be overridden by an environment variable of the same
     (upper-cased) name, e.g. ``GEMINI_API_KEY`` or ``RATE_LIMIT_CAPACITY``.
@@ -28,9 +28,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "StadiumMate"
+    app_name: str = "ArenaGuide"
 
-    # --- Gemini (optional; absence triggers the MockLLM fallback) ---
+    # --- Gemini (optional; absence triggers the OfflineModel fallback) ---
     gemini_api_key: str | None = Field(default=None, description="Google Gemini API key.")
     gemini_model: str = Field(default="gemini-1.5-flash")
     gemini_max_output_tokens: int = Field(default=256, ge=16, le=2048)
@@ -52,6 +52,6 @@ class Settings(BaseSettings):
 
 
 @lru_cache(maxsize=1)
-def get_settings() -> Settings:
-    """Return a process-wide cached :class:`Settings` instance."""
-    return Settings()
+def load_config() -> AppConfig:
+    """Return a process-wide cached :class:`AppConfig` instance."""
+    return AppConfig()

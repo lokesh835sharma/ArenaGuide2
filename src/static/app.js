@@ -5,24 +5,24 @@
 // ---------------------------------------------------------------------------
 const I18N = {
   en: {
-    language: "Language",
-    highVisibility: "High-visibility / screen-reader mode",
-    yourContext: "Your context",
-    whereNow: "Where are you now?",
-    whereGo: "Where do you want to go?",
-    accessNeeds: "Accessibility needs",
-    needWheelchair: "Wheelchair / step-free",
-    needVisual: "Low vision / screen reader",
-    needHearing: "Deaf / hard of hearing",
-    ticketSection: "Ticket section (optional)",
-    minutesToKickoff: "Minutes to kick-off",
-    question: "Ask a question (optional)",
-    questionHint: "Free text is treated as data only and never as instructions.",
-    getHelp: "Get help",
-    assistance: "Assistance",
-    placeholder: "Fill in your context and select “Get help”. Your answer appears here.",
+    language: "Select Language",
+    highVisibility: "High Contrast / Screen Reader Mode",
+    yourContext: "Your Current Status",
+    whereNow: "Current Location",
+    whereGo: "Destination",
+    accessNeeds: "Special Requirements",
+    needWheelchair: "Wheelchair Access / No Stairs",
+    needVisual: "Visual Impairment / Audio Guide",
+    needHearing: "Hearing Impaired",
+    ticketSection: "Seat Section (optional)",
+    minutesToKickoff: "Time until start (mins)",
+    question: "Additional Query (optional)",
+    questionHint: "Your input is analyzed purely for context, not as direct commands.",
+    getHelp: "Request Guidance",
+    assistance: "Navigation Details",
+    placeholder: "Provide your details and click 'Request Guidance' to see your route.",
     grounding:
-      "Answers are grounded in verified stadium data — the assistant never invents facilities.",
+      "All responses are strictly verified against official venue data — we never hallucinate routes.",
   },
   es: {
     language: "Idioma",
@@ -69,9 +69,9 @@ const I18N = {
 
 const INTENT_LABELS = {
   en: {
-    restroom: "Restroom", gate: "Entry gate", seat: "My seat", exit: "Exit",
-    first_aid: "First aid", concession: "Food & drink", guest_services: "Guest services",
-    water: "Water refill", sensory_room: "Sensory room",
+    restroom: "Washroom", gate: "Entry portal", seat: "My chair", exit: "Way out",
+    first_aid: "Medical assistance", concession: "Refreshments", guest_services: "Visitor help",
+    water: "Drinking fountain", sensory_room: "Quiet space",
   },
   es: {
     restroom: "Aseos", gate: "Puerta de entrada", seat: "Mi asiento", exit: "Salida",
@@ -226,7 +226,7 @@ function collectContext() {
     current_location: $("current_location").value,
     destination_intent: $("destination_intent").value,
     accessibility_needs: needs.length ? needs : ["none"],
-    minutes_to_kickoff: parseInt($("minutes_to_kickoff").value, 10),
+    time_to_event: parseInt($("time_to_event").value, 10),
   };
   if (ticket) payload.ticket_section = ticket;
   if (question) payload.question = question;

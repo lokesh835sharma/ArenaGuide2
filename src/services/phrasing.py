@@ -1,12 +1,12 @@
 """Deterministic, offline natural-language phrasing in English, Spanish and French.
 
-This module turns the rules engine's structured facts into localized prose. It is
+This module turns the navigation engine's structured facts into localized prose. It is
 the short-circuit answer generator (no LLM needed) and is also what
-:class:`~app.services.llm.MockLLM` returns. All localized strings live in per-language
-tables here (and localized *facility/zone names* live in the JSON fixtures), so the
-whole response — prose, route steps and place names — is translated even offline.
+:class:`~src.services.ai_client.OfflineModel` returns. All localized strings live in
+per-language tables here (and localized *facility/zone names* live in the JSON fixtures),
+so the whole response — prose, route steps and place names — is translated even offline.
 
-Because output is a pure function of the (hashable) :class:`PhrasingContext`, results
+Because output is a pure function of the (hashable) :class:`ResponseContext`, results
 are memoized with ``lru_cache`` (efficiency) and are fully deterministic (testable).
 
 The LLM (when a real key is configured) only rephrases/translates these same grounded
@@ -41,17 +41,17 @@ _TYPE_LABEL: dict[str, dict[str, str]] = {
            "first_aid": "first aid station", "concession": "concession",
            "guest_services": "guest services desk", "water": "water refill point",
            "sensory_room": "sensory room", "exit": "exit", "gate": "gate",
-           "seat": "seat", "elevator": "elevator"},
+           "seat": "seat", "elevator": "elevator", "merchandise": "merchandise store"},
     "es": {"restroom": "aseo", "accessible_restroom": "aseo accesible",
            "first_aid": "puesto de primeros auxilios", "concession": "puesto de comida",
            "guest_services": "punto de atención", "water": "fuente de agua",
            "sensory_room": "sala sensorial", "exit": "salida", "gate": "puerta",
-           "seat": "asiento", "elevator": "ascensor"},
+           "seat": "asiento", "elevator": "ascensor", "merchandise": "tienda"},
     "fr": {"restroom": "toilettes", "accessible_restroom": "toilettes accessibles",
            "first_aid": "poste de premiers secours", "concession": "point de restauration",
            "guest_services": "comptoir d'accueil", "water": "point d'eau",
            "sensory_room": "salle sensorielle", "exit": "sortie", "gate": "porte",
-           "seat": "place", "elevator": "ascenseur"},
+           "seat": "place", "elevator": "ascenseur", "merchandise": "boutique"},
 }
 
 # Route-step templates: {verb} {to} {name} {lm} are filled in.
@@ -78,7 +78,7 @@ _ANSWER: dict[str, dict[str, str]] = {
     "en": {
         "dest": "Your destination is {name}{lm}.",
         "here": "You're already at this location.",
-        "route": "Follow the {n}-step route below (about {d} m).",
+        "route": "Follow the {n}-step route below (about {d} m). Estimated time: {t} min.",
         "crowd": "Crowd level there is currently {c}.",
         "landmark": "These directions use landmarks and are optimized for screen readers.",
         "captioned": "Look for visual signage on the way; a quiet Sensory Room is available if you need it.",
@@ -87,7 +87,7 @@ _ANSWER: dict[str, dict[str, str]] = {
     "es": {
         "dest": "Su destino es {name}{lm}.",
         "here": "Ya se encuentra en este lugar.",
-        "route": "Siga la ruta de abajo en {n} paso(s) (unos {d} m).",
+        "route": "Siga la ruta de abajo en {n} paso(s) (unos {d} m). Tiempo estimado: {t} min.",
         "crowd": "La afluencia allí es actualmente {c}.",
         "landmark": "Estas indicaciones se basan en puntos de referencia y están optimizadas para lectores de pantalla.",
         "captioned": "Busque la señalización visual por el camino; hay una sala sensorial tranquila disponible si la necesita.",
@@ -96,7 +96,7 @@ _ANSWER: dict[str, dict[str, str]] = {
     "fr": {
         "dest": "Votre destination est {name}{lm}.",
         "here": "Vous y êtes déjà.",
-        "route": "Suivez l'itinéraire ci-dessous en {n} étape(s) (environ {d} m).",
+        "route": "Suivez l'itinéraire ci-dessous en {n} étape(s) (environ {d} m). Temps estimé : {t} min.",
         "crowd": "L'affluence sur place est actuellement {c}.",
         "landmark": "Ces indications s'appuient sur des points de repère et sont optimisées pour les lecteurs d'écran.",
         "captioned": "Repérez la signalétique visuelle en chemin ; une salle sensorielle calme est disponible au besoin.",
@@ -114,12 +114,12 @@ def _cap(text: str) -> str:
     return text[:1].upper() + text[1:] if text else text
 
 
-def type_label(facility_type: str, language: str) -> str:
+def facility_label(facility_type: str, language: str) -> str:
     lang = _lang(language)
     return _TYPE_LABEL[lang].get(facility_type, facility_type.replace("_", " "))
 
 
-def step_instruction(
+def direction_text(
     means: str,
     to_name: str,
     landmark: str | None,
@@ -136,19 +136,19 @@ def step_instruction(
     return template.format(verb=verb, to=to_name, name=facility_name, lm=lm)
 
 
-def alternatives_note(facility_type: str, language: str) -> str:
+def quieter_option_hint(facility_type: str, language: str) -> str:
     """Short localized note explaining a crowd-avoidance facility swap."""
     lang = _lang(language)
-    return _ALT_NOTE[lang].format(label=type_label(facility_type, lang))
+    return _ALT_NOTE[lang].format(label=facility_label(facility_type, lang))
 
 
-def urgency_note(language: str) -> str:
+def time_alert(language: str) -> str:
     """Short localized urgency note for imminent kickoff."""
     return _URGENCY[_lang(language)]
 
 
 @dataclass(frozen=True)
-class PhrasingContext:
+class ResponseContext:
     """Hashable snapshot of everything needed to phrase the final answer."""
 
     language: str
@@ -162,10 +162,12 @@ class PhrasingContext:
     alternative_type: str | None
     total_distance: int
     step_count: int
+    estimated_time_minutes: int | None
+    offline_advice: str | None
 
 
 @lru_cache(maxsize=256)
-def render_answer(ctx: PhrasingContext) -> str:
+def compose_reply(ctx: ResponseContext) -> str:
     """Compose the full localized answer paragraph (memoized)."""
     lang = _lang(ctx.language)
     a = _ANSWER[lang]
@@ -176,14 +178,16 @@ def render_answer(ctx: PhrasingContext) -> str:
     if ctx.step_count == 0:
         parts.append(a["here"])
     else:
-        parts.append(a["route"].format(n=ctx.step_count, d=ctx.total_distance))
+        parts.append(a["route"].format(n=ctx.step_count, d=ctx.total_distance, t=ctx.estimated_time_minutes or 1))
     parts.append(a["crowd"].format(c=crowd))
     if ctx.alternative_type:
-        parts.append(alternatives_note(ctx.alternative_type, lang))
+        parts.append(quieter_option_hint(ctx.alternative_type, lang))
     if ctx.landmark_based:
         parts.append(a["landmark"])
     if ctx.accessibility_mode == "captioned":
         parts.append(a["captioned"])
     if ctx.hurry:
         parts.append(a["hurry"])
+    if ctx.offline_advice:
+        parts.append(ctx.offline_advice)
     return " ".join(parts)

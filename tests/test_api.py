@@ -1,4 +1,4 @@
-"""API contract tests using the offline TestClient (MockLLM)."""
+"""API contract tests using the offline TestClient (OfflineModel)."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def test_assist_offline_with_question_still_not_live(client, base_payload):
     payload = dict(base_payload, question="Where is the nearest restroom?")
     res = client.post("/api/assist", json=payload)
     assert res.status_code == 200
-    # MockLLM is not a live model, so used_llm stays False even with a question.
+    # OfflineModel is not a live model, so used_llm stays False even with a question.
     assert res.json()["used_llm"] is False
 
 
@@ -82,13 +82,13 @@ def test_index_page_served(client):
 
 
 def test_route_not_found_returns_404(client, base_payload, monkeypatch):
-    import app.main as main_mod
-    from app.services.context_engine import RouteNotFound
+    import src.main as main_mod
+    from src.services.rules_engine import PathUnavailable
 
     async def _raise(*args, **kwargs):
-        raise RouteNotFound("boom")
+        raise PathUnavailable("boom")
 
-    monkeypatch.setattr(main_mod, "run_assist", _raise)
+    monkeypatch.setattr(main_mod, "process_request", _raise)
     res = client.post("/api/assist", json=base_payload)
     assert res.status_code == 404
     assert res.json()["detail"] == "boom"

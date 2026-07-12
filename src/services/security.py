@@ -14,21 +14,21 @@ _MAX_QUESTION_LEN = 280
 _WHITESPACE_RE = re.compile(r"\s+")
 
 
-def sanitize_text(text: str) -> str:
+def clean_user_input(text: str) -> str:
     """Neutralise free-text user input before it is stored or shown to the LLM.
 
     Strips control characters (a common prompt-injection / log-forging vector),
     collapses runs of whitespace, trims, and hard-caps the length. The result is
     still treated strictly as *data* (never instructions) by the LLM layer.
     """
-    # Drop control chars: anything below space (0x20) or DEL (0x7f), keeping none
-    # of them — newlines/tabs are converted to spaces by the whitespace collapse.
-    cleaned = "".join(ch for ch in text if ord(ch) >= 32 and ord(ch) != 127)
+    # Drop control chars: anything below space (0x20) or DEL (0x7f), keeping
+    # newlines/tabs so they can be converted to spaces by the whitespace collapse.
+    cleaned = "".join(ch for ch in text if (ord(ch) >= 32 or ch in "\n\t\r") and ord(ch) != 127)
     cleaned = _WHITESPACE_RE.sub(" ", cleaned).strip()
     return cleaned[:_MAX_QUESTION_LEN]
 
 
-class RateLimiter:
+class RequestThrottle:
     """Thread-safe in-memory token-bucket rate limiter, keyed per client.
 
     Each key starts with ``capacity`` tokens and refills at

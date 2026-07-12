@@ -1,6 +1,6 @@
-"""Pydantic v2 request/response models and enums.
+"""Pydantic v2 request/response models and enumeration types.
 
-All external input flows through :class:`UserContext`, which constrains every
+All external input flows through :class:`FanRequest`, which constrains every
 field with enums, bounds and validators. Unknown zone ids and unknown fields are
 rejected, and the free-text ``question`` is sanitized on the way in.
 """
@@ -12,8 +12,8 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class Language(StrEnum):
-    """Supported response languages — the three FIFA WC 2026 host-nation languages
+class Locale(StrEnum):
+    """Supported response locales — the three FIFA WC 2026 host-nation languages
     (USA/Canada → English/French, Mexico → Spanish)."""
 
     en = "en"
@@ -21,14 +21,14 @@ class Language(StrEnum):
     fr = "fr"
 
 
-class AccessibilityNeed(StrEnum):
+class MobilityRequirement(StrEnum):
     wheelchair = "wheelchair"
     visual = "visual"
     hearing = "hearing"
     none = "none"
 
 
-class DestinationIntent(StrEnum):
+class NavigationGoal(StrEnum):
     restroom = "restroom"
     gate = "gate"
     seat = "seat"
@@ -38,62 +38,63 @@ class DestinationIntent(StrEnum):
     guest_services = "guest_services"
     water = "water"
     sensory_room = "sensory_room"
+    merchandise = "merchandise"
 
 
-class CrowdLevel(StrEnum):
+class DensityLevel(StrEnum):
     low = "low"
     medium = "medium"
     high = "high"
 
 
-class AccessibilityMode(StrEnum):
-    """Server-side response mode driving how the UI presents the answer.
+class AssistanceMode(StrEnum):
+    """Server-side response mode controlling how the UI presents the answer.
 
-    (The client also offers a purely visual "high-visibility" CSS theme toggle,
-    which maps to the ``visual`` need → ``screen_reader`` mode server-side.)
+    (The client also provides a purely visual "high-contrast" CSS theme toggle,
+    which maps to the ``visual`` requirement → ``screen_reader`` mode server-side.)
     """
 
     standard = "standard"
     screen_reader = "screen_reader"  # visual need: landmark-based, SR-optimized
-    captioned = "captioned"  # hearing need: emphasize visual signage / sensory room
+    captioned = "captioned"  # hearing need: emphasize visual signage / quiet space
 
 
-class UserContext(BaseModel):
+class FanRequest(BaseModel):
     """Structured fan context — the sole body of ``POST /api/assist``."""
 
     model_config = ConfigDict(extra="forbid")  # reject unknown fields (defense in depth)
 
-    language: Language = Language.en
+    language: Locale = Locale.en
     current_location: str = Field(..., min_length=1, max_length=40)
-    destination_intent: DestinationIntent
-    accessibility_needs: list[AccessibilityNeed] = Field(
-        default_factory=lambda: [AccessibilityNeed.none]
+    destination_intent: NavigationGoal
+    accessibility_needs: list[MobilityRequirement] = Field(
+        default_factory=lambda: [MobilityRequirement.none]
     )
     ticket_section: str | None = Field(
         default=None, max_length=8, pattern=r"^[A-Za-z0-9\- ]{1,8}$"
     )
-    minutes_to_kickoff: int = Field(..., ge=-120, le=1440)
+    time_to_event: int = Field(..., ge=-120, le=1440)
     question: str | None = Field(default=None, max_length=280)
 
     @field_validator("current_location")
     @classmethod
     def _zone_must_exist(cls, value: str) -> str:
         # Imported lazily to avoid a circular import at module load time.
-        from app.services.stadium_data import get_stadium
+        from src.services.stadium_data import load_venue
 
-        if value not in get_stadium().zone_ids():
+        if value not in load_venue().zone_ids():
             raise ValueError(f"unknown zone id: {value!r}")
         return value
 
     @field_validator("accessibility_needs")
     @classmethod
-    def _normalize_needs(cls, needs: list[AccessibilityNeed]) -> list[AccessibilityNeed]:
+    def _normalize_needs(cls, needs: list[MobilityRequirement]) -> list[MobilityRequirement]:
         unique = set(needs)
-        # "none" is meaningless alongside a real need; drop it.
-        if AccessibilityNeed.none in unique and len(unique) > 1:
-            unique.discard(AccessibilityNeed.none)
+        # "none" is meaningless alongside a real requirement; drop it.
+        if MobilityRequirement.none in unique and len(unique) > 1:
+            unique.discard(MobilityRequirement.none)
         if not unique:
-            unique = {AccessibilityNeed.none}
+            unique = {MobilityRequirement.none}
         return sorted(unique, key=lambda n: n.value)
 
     @field_validator("question")
@@ -101,13 +102,13 @@ class UserContext(BaseModel):
     def _sanitize_question(cls, value: str | None) -> str | None:
         if value is None:
             return None
-        from app.services.security import sanitize_text
+        from src.services.security import clean_user_input
 
-        cleaned = sanitize_text(value)
+        cleaned = clean_user_input(value)
         return cleaned or None
 
 
-class RouteStep(BaseModel):
+class DirectionStep(BaseModel):
     """One leg of a route, with an accessibility-aware, localized instruction."""
 
     order: int
@@ -120,7 +121,7 @@ class RouteStep(BaseModel):
     instruction: str
 
 
-class FacilityInfo(BaseModel):
+class VenuePoint(BaseModel):
     """Public representation of a resolved facility."""
 
     id: str
@@ -131,33 +132,37 @@ class FacilityInfo(BaseModel):
     landmark: str | None = None
 
 
-class DecisionResult(BaseModel):
-    """Internal, deterministic result of the rules engine (pre-phrasing)."""
+class NavigationResult(BaseModel):
+    """Internal, deterministic result of the navigation engine (pre-phrasing)."""
 
-    facility: FacilityInfo
-    route_steps: list[RouteStep]
-    crowd_level: CrowdLevel
-    language: Language
-    accessibility_mode: AccessibilityMode
+    facility: VenuePoint
+    route_steps: list[DirectionStep]
+    crowd_level: DensityLevel
+    language: Locale
+    accessibility_mode: AssistanceMode
     landmark_based: bool = False
     hurry: bool = False
     alternatives_note: str | None = None
     urgency: str | None = None
+    estimated_time_minutes: int | None = None
+    offline_advice: str | None = None
 
 
-class AssistResponse(BaseModel):
+class GuidanceResponse(BaseModel):
     """Response body of ``POST /api/assist``."""
 
     answer: str
-    route_steps: list[RouteStep]
-    facility: FacilityInfo
-    crowd_level: CrowdLevel
-    language: Language
-    accessibility_mode: AccessibilityMode
+    route_steps: list[DirectionStep]
+    facility: VenuePoint
+    crowd_level: DensityLevel
+    language: Locale
+    accessibility_mode: AssistanceMode
     alternatives_note: str | None = None
     urgency: str | None = None
     used_llm: bool
+    estimated_time_minutes: int | None = None
+    offline_advice: str | None = None
 
 
-class HealthResponse(BaseModel):
+class StatusResponse(BaseModel):
     status: str = "ok"

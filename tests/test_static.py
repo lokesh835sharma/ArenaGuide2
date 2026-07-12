@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import app
+import src
 
-_HTML = (Path(app.__file__).resolve().parent / "static" / "index.html").read_text(encoding="utf-8")
+_HTML = (Path(src.__file__).resolve().parent / "static" / "index.html").read_text(encoding="utf-8")
 
 
 def test_document_has_lang_attribute():
@@ -32,7 +32,7 @@ def test_form_controls_have_associated_labels():
     # Every interactive control id must have a matching <label for="..."> (or be
     # inside a labelled fieldset). Checkboxes are wrapped in <label> elements.
     for control_id in ("language", "current_location", "destination_intent",
-                       "ticket_section", "minutes_to_kickoff", "question"):
+                       "ticket_section", "time_to_event", "question"):
         assert f'id="{control_id}"' in _HTML
         assert f'for="{control_id}"' in _HTML
     assert "<fieldset" in _HTML and "<legend" in _HTML

@@ -1,27 +1,35 @@
-"""Crowd-simulation tests — deterministic escalation/relief from kick-off time."""
-
 from __future__ import annotations
 
-from app.services.crowd import effective_crowd
-from app.services.stadium_data import get_stadium
+import pytest
+
+from src.services.crowd import compute_density
 
 
-def test_none_minutes_returns_base_level():
-    stadium = get_stadium()
-    # concourse_lower_sw base level is "high".
-    assert effective_crowd(stadium, "concourse_lower_sw", None) == "high"
+@pytest.fixture
+def _venue():
+    from src.services.stadium_data import load_venue
+
+    return load_venue()
 
 
-def test_in_play_gate_relief():
-    stadium = get_stadium()
-    # gate_a base "medium"; once the match is underway gates relax by one level.
-    assert effective_crowd(stadium, "gate_a", -10) == "low"
+def test_effective_crowd_no_time_returns_base(_venue):
+    assert compute_density(_venue, "gate_a", None) == "medium"
+    assert compute_density(_venue, "seating_upper", None) == "low"
 
 
-def test_surge_windows_escalate_gates():
-    stadium = get_stadium()
-    # gate_c base "low": imminent (+2) → high, pre-match (+1) → medium.
-    assert effective_crowd(stadium, "gate_c", 5) == "high"
-    assert effective_crowd(stadium, "gate_c", 20) == "medium"
-    # Well before kickoff → unchanged.
-    assert effective_crowd(stadium, "gate_c", 300) == "low"
+def test_gates_surge_before_match(_venue):
+    # 25 mins out -> +1 level
+    assert compute_density(_venue, "gate_a", 25) == "high"
+    # 5 mins out -> +2 levels
+    assert compute_density(_venue, "gate_a", 5) == "high"
+
+
+def test_gates_relax_in_play(_venue):
+    # match started 10 mins ago
+    assert compute_density(_venue, "gate_a", -10) == "low"
+
+
+def test_seating_never_surges(_venue):
+    # Seating areas are not "surge_zone_types"
+    assert compute_density(_venue, "seating_upper", 5) == "low"
+    assert compute_density(_venue, "seating_upper", -10) == "low"

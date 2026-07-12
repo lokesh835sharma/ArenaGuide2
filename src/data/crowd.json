@@ -14,7 +14,7 @@
     "seating_upper": "low"
   },
   "simulation": {
-    "_comment": "Crowd is layered on top of the base level from minutes_to_kickoff. Positive = before kickoff, negative = match underway.",
+    "_comment": "Crowd is layered on top of the base level from time_to_event. Positive = before kickoff, negative = match underway.",
     "pre_match_window_minutes": 30,
     "imminent_window_minutes": 10,
     "surge_zone_types": ["gate", "concourse"],

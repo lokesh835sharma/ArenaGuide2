@@ -1,7 +1,7 @@
 """Privacy-preserving logging setup.
 
-Security requirement: never log secrets or raw PII. Application code logs only
-non-identifying signals such as zone ids, destination intents and outcomes — it
+Security constraint: never log secrets or raw PII. Application code logs only
+non-identifying signals such as zone ids, navigation goals and outcomes — it
 must never pass the API key or the raw free-text ``question`` to the logger.
 """
 
@@ -24,7 +24,7 @@ def configure_logging(level: int = logging.INFO) -> None:
     _CONFIGURED = True
 
 
-def get_logger(name: str) -> logging.Logger:
+def create_logger(name: str) -> logging.Logger:
     """Return a namespaced logger, ensuring logging is configured first."""
     configure_logging()
     return logging.getLogger(name)

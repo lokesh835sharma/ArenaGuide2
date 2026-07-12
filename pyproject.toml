@@ -1,5 +1,5 @@
 [project]
-name = "stadiummate"
+name = "arenaguide"
 version = "1.0.0"
 description = "Multilingual, accessible stadium assistant for FIFA World Cup 2026."
 requires-python = ">=3.11"
@@ -23,4 +23,4 @@ ignore_missing_imports = true   # google.generativeai is imported lazily / optio
 warn_redundant_casts = true
 warn_unused_ignores = true
 no_implicit_optional = true
-files = ["app"]
+files = ["src"]

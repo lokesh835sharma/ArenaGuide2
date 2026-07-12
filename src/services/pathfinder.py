@@ -1,6 +1,6 @@
-"""Shortest-path routing over the stadium zone graph.
+"""Shortest-path routing over the venue zone graph.
 
-A tiny Dijkstra implementation finds the least-distance path between two zones.
+A compact Dijkstra implementation finds the least-distance path between two zones.
 When ``step_free_only`` is set (wheelchair / visual needs), edges that are not
 step-free (e.g. stairs) are excluded, so accessible routes provably differ from
 the default ones.
@@ -10,11 +10,11 @@ from __future__ import annotations
 
 import heapq
 
-from app.services.stadium_data import Edge, Stadium
+from src.services.stadium_data import Edge, VenueData
 
 
-def find_path(
-    stadium: Stadium, start: str, goal: str, *, step_free_only: bool = False
+def calculate_route(
+    venue: VenueData, start: str, goal: str, *, step_free_only: bool = False
 ) -> list[Edge] | None:
     """Return the list of edges from ``start`` to ``goal``.
 
@@ -23,7 +23,7 @@ def find_path(
     """
     if start == goal:
         return []
-    if start not in stadium.zones or goal not in stadium.zones:
+    if start not in venue.zones or goal not in venue.zones:
         return None
 
     # Priority queue of (cumulative_distance, zone_id).
@@ -37,7 +37,7 @@ def find_path(
             return _reconstruct(came_from, goal)
         if cost > best_cost.get(node, float("inf")):
             continue  # stale queue entry
-        for edge in stadium.neighbors(node):
+        for edge in venue.neighbors(node):
             if step_free_only and not edge.step_free:
                 continue
             new_cost = cost + edge.distance
@@ -61,6 +61,6 @@ def _reconstruct(came_from: dict[str, tuple[str, Edge]], goal: str) -> list[Edge
     return path
 
 
-def path_distance(path: list[Edge]) -> int:
+def route_distance(path: list[Edge]) -> int:
     """Total distance of a path (0 for an empty path)."""
     return sum(edge.distance for edge in path)

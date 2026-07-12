@@ -1,4 +1,4 @@
-"""Stadium fixture loading and lookup helpers.
+"""Venue fixture loading and lookup helpers.
 
 The three JSON fixtures (``stadium.json``, ``facilities.json``, ``crowd.json``)
 are read **once** and cached for the process lifetime (efficiency requirement),
@@ -31,7 +31,7 @@ def localized(mapping: I18n | None, language: str) -> str | None:
 
 @dataclass
 class Zone:
-    """A navigable location node in the stadium graph (name localized EN/ES/FR)."""
+    """A navigable location node in the venue graph (name localized EN/ES/FR)."""
 
     id: str
     names: I18n
@@ -51,7 +51,7 @@ class Edge:
 
 @dataclass
 class Facility:
-    """A point of interest (restroom, first aid, concession, gate, seat, ...).
+    """A point of interest (washroom, medical station, refreshments, gate, seat, ...).
 
     ``names`` and ``landmarks`` are localized mappings (EN/ES/FR).
     """
@@ -65,8 +65,8 @@ class Facility:
 
 
 @dataclass
-class Stadium:
-    """In-memory model of the stadium: zones, adjacency graph, facilities, crowd."""
+class VenueData:
+    """In-memory model of the venue: zones, adjacency graph, facilities, crowd."""
 
     name: str
     fifa_name: str
@@ -115,8 +115,8 @@ def _read_json(filename: str) -> dict:
         return json.load(fh)
 
 
-def _build_stadium() -> Stadium:
-    """Parse the JSON fixtures into a :class:`Stadium` (called once, then cached)."""
+def _build_venue() -> VenueData:
+    """Parse the JSON fixtures into a :class:`VenueData` (called once, then cached)."""
     stadium_raw = _read_json("stadium.json")
     facilities_raw = _read_json("facilities.json")
     crowd_raw = _read_json("crowd.json")
@@ -150,7 +150,7 @@ def _build_stadium() -> Stadium:
     ]
 
     meta = stadium_raw["stadium"]
-    return Stadium(
+    return VenueData(
         name=meta["name"],
         fifa_name=meta["fifa_name"],
         city=meta["city"],
@@ -164,6 +164,6 @@ def _build_stadium() -> Stadium:
 
 
 @lru_cache(maxsize=1)
-def get_stadium() -> Stadium:
-    """Return the process-wide, lazily-loaded :class:`Stadium` singleton."""
-    return _build_stadium()
+def load_venue() -> VenueData:
+    """Return the process-wide, lazily-loaded :class:`VenueData` singleton."""
+    return _build_venue()
