@@ -6,6 +6,11 @@
   included_files = ["src/data/**", "src/static/**"]
 
 [[redirects]]
+  from = "/api/stadium"
+  to = "/.netlify/functions/stadium"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
