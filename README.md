@@ -163,7 +163,7 @@ flowchart TD
 
 ## 4. How It Works — Setup & Run
 
-**Requirements:** Python 3.11+.
+**Requirements:** Python 3.12 (Latest).
 
 ```bash
 cd arenaguide
